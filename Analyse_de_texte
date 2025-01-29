@@ -54,9 +54,16 @@ int comparer_chaines(const char* chaine1, const char* chaine2) {
     }
     return 0;  // Les chaînes sont identiques
 }
-
 // Convertit une chaîne en minuscules (modification in-place c'est-à-dire qu'on modifie directement le contenu de la chaîne de caractères)
-
+void convertir_minuscules(char* chaine) {
+    int i = 0;
+    while (chaine[i] != '\0') {
+        if (chaine[i] >= 'A' && chaine[i] <= 'Z') {
+            chaine[i] = chaine[i] + 32;  // Conversion ASCII majuscule -> minuscule
+        }
+        i++;
+    }
+}
 
 /*
 STRUCTURE DE DONNÉES
