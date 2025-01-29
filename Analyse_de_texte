@@ -1,0 +1,285 @@
+#include <iostream>  // Pour les entrées/sorties standard
+#include <fstream>  // Pour la manipulation des fichiers
+
+
+/*
+FONCTIONS MANIPULATION DE CHAÎNES
+ */
+
+// Calcule la longueur d'une chaîne de caractères en comptant jusqu'au "\0'
+
+// Crée une copie d'une chaîne de caractères dans une nouvelle et
+//et renvoie un pointeur vers la nouvelle chaîne créée par allocation dynamique
+
+
+// On compare deux chaînes de caractères par ordre alphabétique
+int comparer_chaines(const char* chaine1, const char* chaine2) {
+    int i = 0;
+    
+    /*Compare les caractères tant qu'ils sont identiques et qu'on n'a pas atteint la fin d'une des chaînes*/ 
+    while (chaine1[i] != '\0' && chaine2[i] != '\0') {
+        if (chaine1[i] < chaine2[i]) {
+            return -1;  // chaine1 est plus petite
+        }
+        if (chaine1[i] > chaine2[i]) {
+            return 1;   // chaine1 est plus grande
+        }
+        i++;
+    }
+    /*Si on arrive à la fin de l'une des chaines et que tous les caractères comparés jusqu'ici sont identiques,
+    On vérifie maintenant laquelle des chaînes est plus longue*/ 
+    
+    if (chaine1[i] == '\0' && chaine2[i] != '\0') {
+        return -1;  // chaine1 est plus petite
+    }
+    if (chaine1[i] != '\0' && chaine2[i] == '\0') {
+        return 1;   // chaine1 est plus grande
+    }
+    return 0;  // Les chaînes sont identiques
+}
+
+// Convertit une chaîne en minuscules (modification in-place c'est-à-dire qu'on modifie directement le contenu de la chaîne de caractères)
+
+
+/*
+STRUCTURE DE DONNÉES
+ */
+
+// Structure représentant un nœud dans notre liste chaînée
+// Chaque nœud contient un mot, sa fréquence et un pointeur vers le nœud suivant
+struct NoeudMot {
+    char* mot;          
+    int frequence;      
+    NoeudMot* suivant;  
+    
+    // Constructeur : initialise un nouveau nœud avec un mot
+    // La fréquence est initialisée à 1 et le pointeur suivant à nullptr
+    NoeudMot(char* m) : frequence(1), suivant(nullptr) {
+        mot = copier_chaine(m);
+    }
+};
+
+/*
+ CLASSE PRINCIPALE D'ANALYSE DE TEXTE
+*/
+
+class AnalyseurTexte {
+private://Ici, nous avons les parties de le classe dont nous n'aurons pas besoin dans le reste du programme
+    NoeudMot* premier;  // Pointeur vers le premier nœud de la liste
+    int totalMots;      // Nombre total de mots dans le texte
+    
+    // Vérifie si un caractère est une lettre
+    bool est_lettre(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    }
+    
+    /* Ici, on nettoie un mot en retirant les caractères non-alphabétiques
+     et en convertissant en minuscules*/
+    char* nettoyer_mot(char* mot) {
+        int indice_ecriture = 0;
+        int indice_lecture = 0;
+        
+        // On parcourt le mot et on ne garde que les lettres
+        while (mot[indice_lecture] != '\0') {
+            if (est_lettre(mot[indice_lecture])) {
+                mot[indice_ecriture] = mot[indice_lecture];
+                indice_ecriture++;
+            }
+            indice_lecture++;
+        }
+        mot[indice_ecriture] = '\0';
+        convertir_minuscules(mot);
+        return mot;
+    }
+
+public://Ici, ce sont les parties de la classe qui pourront être utilisées dans le reste du programme
+    // Constructeur : initialise une liste vide
+    AnalyseurTexte() : premier(nullptr), totalMots(0) {}
+    
+    // Ajoute ou met à jour un mot dans la liste
+    void ajouter_mot(char* mot) {
+        if (longueur_chaine(mot) == 0) return;
+        
+        // Cas spécial : premier mot
+        if (!premier) {
+            premier = new NoeudMot(mot);
+            totalMots++;
+            return;
+        }
+        
+        // Recherche la position d'insertion dans la liste triée
+        NoeudMot* actuel = premier;
+        NoeudMot* precedent = nullptr;
+        
+        while (actuel != nullptr) {
+            int comp = comparer_chaines(actuel->mot, mot);
+            if (comp == 0) {  // Mot déjà présent
+                actuel->frequence++;
+                totalMots++;
+                return;
+            }
+            if (comp > 0) break;  // Position d'insertion trouvée
+            precedent = actuel;
+            actuel = actuel->suivant;
+        }
+        
+        // Insertion du nouveau mot
+        NoeudMot* nouveau_noeud = new NoeudMot(mot);
+        if (!precedent) {  // Insertion en tête
+            nouveau_noeud->suivant = premier;
+            premier = nouveau_noeud;
+        } else {  // Insertion au milieu ou à la fin
+            nouveau_noeud->suivant = actuel;
+            precedent->suivant = nouveau_noeud;
+        }
+        totalMots++;
+    }
+    
+    // Lecture et analyse du fichier texte
+    bool analyser_fichier(const char* nom_fichier) {
+        //Ouverture du fichier
+        std::ifstream fichier(nom_fichier);
+        if (!fichier.is_open()) {
+            std::cout << "Erreur: Impossible d'ouvrir le fichier.\n";
+            return false;
+        }
+
+        // Détermination de la taille du fichier
+        fichier.seekg(0, std::ios::end);
+        std::streampos taille_fichier = fichier.tellg();
+        fichier.seekg(0, std::ios::beg);
+
+        // Allocation dynamique du tampon principal, qui va permettre de lire le fichier par morceaux
+        const int TAILLE_BLOC = 4096;  // 4 Ko par bloc
+        char* tampon = new char[TAILLE_BLOC];
+        char* mot_tamp = new char[256];  // Tampon temporaire pour chaque mot
+        int indice_mot = 0;
+
+        // Lecture du fichier par blocs
+        std::streamsize octets_restants = taille_fichier;
+        while (octets_restants > 0) {
+            // Calculer la taille du prochain bloc ou tampon à lire
+            std::streamsize taille_lecture = 
+                (octets_restants > TAILLE_BLOC) ? TAILLE_BLOC : octets_restants;
+            
+            // Lecture d'un bloc
+            fichier.read(tampon, taille_lecture);
+            if (!fichier) {
+                delete[] tampon;
+                delete[] mot_tamp;
+                std::cout << "Erreur de lecture du fichier.\n";
+                return false;
+            }
+
+            // Traitement du bloc caractère par caractère
+            for (int i = 0; i < taille_lecture; i++) {
+                if (est_lettre(tampon[i])) {
+                    if (indice_mot < 255) {  // Pour éviter un éventuel débordement
+                        mot_tamp[indice_mot++] = tampon[i];
+                    }
+                } else if (indice_mot > 0) {
+                    // A la fin d'un mot, on ajoute le caractère '\0' 
+                    //pour que le mot soit considédé comme une chaine de caractères
+                    mot_tamp[indice_mot] = '\0';
+                    ajouter_mot(nettoyer_mot(mot_tamp));
+                    indice_mot = 0;
+                }
+            }
+
+            octets_restants -= taille_lecture;
+        }
+
+        // Traiter le dernier mot si nécessaire
+        if (indice_mot > 0) {
+            mot_tamp[indice_mot] = '\0';
+            ajouter_mot(nettoyer_mot(mot_tamp));
+        }
+
+        // Libération de la mémoire
+        delete[] tampon;
+        delete[] mot_tamp;
+
+        fichier.close();
+        return true;
+    }
+
+    
+    // On affiche les n mots les plus fréquents
+    void afficher_mots_frequents(int n) {
+        // Création d'un tableau temporaire pour le tri
+        NoeudMot** mots = new NoeudMot*[totalMots];
+        int nombre_mots = 0;
+        
+        // Copie des pointeurs dans le tableau
+        NoeudMot* actuel = premier;
+        while (actuel != nullptr) {
+            mots[nombre_mots++] = actuel;
+            actuel = actuel->suivant;
+        }
+        
+        // Tri à bulles par fréquence décroissante
+        for (int i = 0; i < nombre_mots - 1; i++) {
+            for (int j = 0; j < nombre_mots - i - 1; j++) {
+                if (mots[j]->frequence < mots[j + 1]->frequence) {
+                    NoeudMot* temp = mots[j];
+                    mots[j] = mots[j + 1];
+                    mots[j + 1] = temp;
+                }
+            }
+        }
+        
+        // Affichage des résultats
+        std::cout << "\nLes " << n << " mots les plus fréquents:\n";
+        for (int i = 0; i < n && i < nombre_mots; i++) {
+            std::cout << mots[i]->mot << ": " << mots[i]->frequence << " fois\n";
+        }
+        
+        delete[] mots;  // Libération de la mémoire
+    }
+    
+    // Affiche les statistiques générales
+    void afficher_statistiques() {
+        int mots_uniques = 0;
+        NoeudMot* actuel = premier;
+        while (actuel != nullptr) {
+            mots_uniques++;
+            actuel = actuel->suivant;
+        }
+        
+        std::cout << "\nStatistiques générales:\n";
+        std::cout << "Nombre total de mots: " << totalMots << "\n";
+        std::cout << "Nombre de mots uniques: " << mots_uniques << "\n";
+    }
+    
+    // Destructeur : libère la mémoire
+    ~AnalyseurTexte() {
+        NoeudMot* actuel = premier;
+        while (actuel != nullptr) {
+            NoeudMot* suivant = actuel->suivant;
+            delete[] actuel->mot;    // Libère la chaîne de caractères
+            delete actuel;           // Libère le nœud
+            actuel = suivant;
+        }
+    }
+};
+/*
+ FONCTION PRINCIPALE
+ */
+
+int main() {
+    AnalyseurTexte analyseur;
+    char nom_fichier[256];
+    
+    // Interface utilisateur
+    std::cout << "Analyseur de fréquence des mots\n";
+    std::cout << "Entrez le nom du fichier à analyser: ";
+    std::cin >> nom_fichier;
+
+    // Lecture et analyse du fichier
+    if (!analyseur.analyser_fichier(nom_fichier)) {
+        return 1;
+    }
+
+    // Boucle principale du menu
+    return 0;
+}
