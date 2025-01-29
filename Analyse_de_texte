@@ -7,10 +7,26 @@ FONCTIONS MANIPULATION DE CHAÎNES
  */
 
 // Calcule la longueur d'une chaîne de caractères en comptant jusqu'au "\0'
-
+int longueur_chaine(const char* chaine) {
+    int longueur = 0;
+    while (chaine[longueur] != '\0') {  // Parcourt jusqu'au caractère nul
+        longueur++;
+    }
+    return longueur;
+}
 // Crée une copie d'une chaîne de caractères dans une nouvelle et
 //et renvoie un pointeur vers la nouvelle chaîne créée par allocation dynamique
-
+char* copier_chaine(const char* source) {
+    int len = longueur_chaine(source);
+    char* destination = new char[len + 1];  // +1 pour le caractère nul
+    int i = 0;
+    while (source[i] != '\0') {
+        destination[i] = source[i];
+        i++;
+    }
+    destination[i] = '\0';
+    return destination;
+}
 
 // On compare deux chaînes de caractères par ordre alphabétique
 int comparer_chaines(const char* chaine1, const char* chaine2) {
@@ -283,3 +299,30 @@ int main() {
     // Boucle principale du menu
     return 0;
 }
+while (true) {
+        std::cout << "\nMenu:\n";
+        std::cout << "1. Afficher les N mots les plus fréquents\n";
+        std::cout << "2. Afficher les statistiques générales\n";
+        std::cout << "3. Quitter\n";
+        std::cout << "Votre choix: ";
+
+        int choix;
+        std::cin >> choix;
+
+        switch (choix) {
+            case 1: {
+                int n;
+                std::cout << "Combien de mots voulez-vous afficher ? ";
+                std::cin >> n;
+                analyseur.afficher_mots_frequents(n);
+                break;
+            }
+            case 2:
+                analyseur.afficher_statistiques();
+                break;
+            case 3:
+                return 0;
+            default:
+                std::cout << "Choix invalide\n";
+        }
+    }
