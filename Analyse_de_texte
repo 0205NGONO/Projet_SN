@@ -282,6 +282,21 @@ public://Ici, ce sont les parties de la classe qui pourront être utilisées dan
 /*
  FONCTION PRINCIPALE
  */
+int main() {
+    AnalyseurTexte analyseur;
+    char nom_fichier[256];
+    
+    // Interface utilisateur
+    std::cout << "Analyseur de fréquence des mots\n";
+    std::cout << "Entrez le nom du fichier à analyser: ";
+    std::cin >> nom_fichier;
+
+    // Lecture et analyse du fichier
+    if (!analyseur.analyser_fichier(nom_fichier)) {
+        return 1;
+    }
+
+    // Boucle principale du menu
 while (true) {
         std::cout << "\nMenu:\n";
         std::cout << "1. Afficher les N mots les plus fréquents\n";
@@ -309,21 +324,5 @@ while (true) {
                 std::cout << "Choix invalide\n";
         }
     }
-
-int main() {
-    AnalyseurTexte analyseur;
-    char nom_fichier[256];
-    
-    // Interface utilisateur
-    std::cout << "Analyseur de fréquence des mots\n";
-    std::cout << "Entrez le nom du fichier à analyser: ";
-    std::cin >> nom_fichier;
-
-    // Lecture et analyse du fichier
-    if (!analyseur.analyser_fichier(nom_fichier)) {
-        return 1;
-    }
-
-    // Boucle principale du menu
     return 0;
 }
