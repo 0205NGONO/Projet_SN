@@ -14,6 +14,7 @@ int longueur_chaine(const char* chaine) {
     }
     return longueur;
 }
+
 // Crée une copie d'une chaîne de caractères dans une nouvelle et
 //et renvoie un pointeur vers la nouvelle chaîne créée par allocation dynamique
 char* copier_chaine(const char* source) {
