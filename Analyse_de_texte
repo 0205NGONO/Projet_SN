@@ -262,7 +262,7 @@ public://Ici, ce sont les parties de la classe qui pourront être utilisées dan
         delete[] mots;  // Libération de la mémoire
     }
     
-    // Affiche les statistiques générales
+    // Affiche les statistiques générales (nombre total de mots, nombres de mots uniques)
     void afficher_statistiques() {
         int mots_uniques = 0;
         NoeudMot* actuel = premier;
@@ -310,7 +310,7 @@ while (true) {
         cout << "1. Afficher les N mots les plus fréquents\n";
         cout << "2. Afficher les statistiques générales\n";
         cout << "3. Quitter\n";
-        cout << "Votre choix: ";
+        cout << "Veuillez entrer votre choix: ";
 
         int choix;
         cin >> choix;
