@@ -1,6 +1,7 @@
 #include <iostream>  // Pour les entrées/sorties standard
 #include <fstream>  // Pour la manipulation des fichiers
 
+using namespace std ;
 
 /*
 FONCTIONS MANIPULATION DE CHAÎNES
@@ -162,15 +163,15 @@ public://Ici, ce sont les parties de la classe qui pourront être utilisées dan
     // Lecture et analyse du fichier texte
     bool analyser_fichier(const char* nom_fichier) {
         //Ouverture du fichier
-        std::ifstream fichier(nom_fichier);
+        ifstream fichier(nom_fichier);
         if (!fichier.is_open()) {
-            std::cout << "Erreur: Impossible d'ouvrir le fichier.\n";
+            cout << "Erreur: Impossible d'ouvrir le fichier.\n";
             return false;
         }
 
         // Détermination de la taille du fichier
         fichier.seekg(0, std::ios::end);
-        std::streampos taille_fichier = fichier.tellg();
+        streampos taille_fichier = fichier.tellg();
         fichier.seekg(0, std::ios::beg);
 
         // Allocation dynamique du tampon principal, qui va permettre de lire le fichier par morceaux
@@ -180,10 +181,10 @@ public://Ici, ce sont les parties de la classe qui pourront être utilisées dan
         int indice_mot = 0;
 
         // Lecture du fichier par blocs
-        std::streamsize octets_restants = taille_fichier;
+        streamsize octets_restants = taille_fichier;
         while (octets_restants > 0) {
             // Calculer la taille du prochain bloc ou tampon à lire
-            std::streamsize taille_lecture = 
+            streamsize taille_lecture = 
                 (octets_restants > TAILLE_BLOC) ? TAILLE_BLOC : octets_restants;
             
             // Lecture d'un bloc
@@ -191,7 +192,7 @@ public://Ici, ce sont les parties de la classe qui pourront être utilisées dan
             if (!fichier) {
                 delete[] tampon;
                 delete[] mot_tamp;
-                std::cout << "Erreur de lecture du fichier.\n";
+                cout << "Erreur de lecture du fichier.\n";
                 return false;
             }
 
@@ -253,7 +254,7 @@ public://Ici, ce sont les parties de la classe qui pourront être utilisées dan
         }
         
         // Affichage des résultats
-        std::cout << "\nLes " << n << " mots les plus fréquents:\n";
+        cout << "\nLes " << n << " mots les plus fréquents:\n";
         for (int i = 0; i < n && i < nombre_mots; i++) {
             std::cout << mots[i]->mot << ": " << mots[i]->frequence << " fois\n";
         }
@@ -270,9 +271,9 @@ public://Ici, ce sont les parties de la classe qui pourront être utilisées dan
             actuel = actuel->suivant;
         }
         
-        std::cout << "\nStatistiques générales:\n";
-        std::cout << "Nombre total de mots: " << totalMots << "\n";
-        std::cout << "Nombre de mots uniques: " << mots_uniques << "\n";
+        cout << "\nStatistiques générales:\n";
+        cout << "Nombre total de mots: " << totalMots << "\n";
+        cout << "Nombre de mots uniques: " << mots_uniques << "\n";
     }
     
     // Destructeur : libère la mémoire
@@ -294,9 +295,9 @@ int main() {
     char nom_fichier[256];
     
     // Interface utilisateur
-    std::cout << "Analyseur de fréquence des mots\n";
-    std::cout << "Entrez le nom du fichier à analyser: ";
-    std::cin >> nom_fichier;
+    cout << "Analyseur de fréquence des mots\n";
+    cout << "Entrez le nom du fichier à analyser: ";
+    cin >> nom_fichier;
 
     // Lecture et analyse du fichier
     if (!analyseur.analyser_fichier(nom_fichier)) {
@@ -305,20 +306,20 @@ int main() {
 
     // Boucle principale du menu
 while (true) {
-        std::cout << "\nMenu:\n";
-        std::cout << "1. Afficher les N mots les plus fréquents\n";
-        std::cout << "2. Afficher les statistiques générales\n";
-        std::cout << "3. Quitter\n";
-        std::cout << "Votre choix: ";
+        cout << "\nMenu:\n";
+        cout << "1. Afficher les N mots les plus fréquents\n";
+        cout << "2. Afficher les statistiques générales\n";
+        cout << "3. Quitter\n";
+        cout << "Votre choix: ";
 
         int choix;
-        std::cin >> choix;
+        cin >> choix;
 
         switch (choix) {
             case 1: {
                 int n;
-                std::cout << "Combien de mots voulez-vous afficher ? ";
-                std::cin >> n;
+                cout << "Combien de mots voulez-vous afficher ? ";
+                cin >> n;
                 analyseur.afficher_mots_frequents(n);
                 break;
             }
